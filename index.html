@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Armatta - Téléchargements</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card-bg: #161b22;
+    --border: #30363d;
+    --gold: #d4af37;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+    padding: 0 20px;
+  }
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 60px 0 80px;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+  h1 {
+    font-size: 2.6rem;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .tagline {
+    color: var(--text-dim);
+    font-size: 1.05rem;
+    font-style: italic;
+  }
+  .divider {
+    width: 60px;
+    height: 2px;
+    background: var(--gold);
+    margin: 24px auto;
+  }
+  .intro {
+    text-align: center;
+    color: var(--text-dim);
+    max-width: 560px;
+    margin: 0 auto 48px;
+  }
+  .downloads {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    transition: border-color 0.2s ease;
+  }
+  .card:hover {
+    border-color: var(--gold);
+  }
+  .card-info h2 {
+    font-size: 1.15rem;
+    margin-bottom: 4px;
+  }
+  .card-info p {
+    color: var(--text-dim);
+    font-size: 0.92rem;
+  }
+  .btn {
+    flex-shrink: 0;
+    background: var(--gold);
+    color: #0d1117;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 0.92rem;
+    white-space: nowrap;
+    transition: opacity 0.2s ease;
+  }
+  .btn:hover { opacity: 0.85; }
+  footer {
+    text-align: center;
+    margin-top: 60px;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+  }
+  footer a {
+    color: var(--gold);
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>ARMATTA</h1>
+      <p class="tagline">Brutal et Imprévisible</p>
+      <div class="divider"></div>
+    </header>
+
+    <p class="intro">
+      Retrouvez ici l'ensemble des sources nécessaires pour jouer à Armatta :
+      le livre de règles complet et le plateau de jeu, en téléchargement libre et gratuit.
+    </p>
+
+    <div class="downloads">
+      <div class="card">
+        <div class="card-info">
+          <h2>📖 Livre de règles</h2>
+          <p>Version 1.0 — règles complètes du jeu</p>
+        </div>
+        <a class="btn" href="ARMATTA%20-%20LIVRE%20DE%20REGLES%20V1.0.pdf" download>Télécharger (PDF)</a>
+      </div>
+
+      <div class="card">
+        <div class="card-info">
+          <h2>🗺️ Plateau de jeu</h2>
+          <p>Version 1.0 — grille 8x8 imprimable</p>
+        </div>
+        <a class="btn" href="Plateau%20de%20jeu%20-%20V1.0.png" download>Télécharger (PNG)</a>
+      </div>
+    </div>
+
+    <footer>
+      <p>Armatta &mdash; <a href="https://armatta.fr">armatta.fr</a></p>
+    </footer>
+  </div>
+</body>
+</html>
