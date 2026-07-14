@@ -131,7 +131,7 @@
     <span class="brand-sub">Championnat</span>
   </div>
   <div class="header-right">
-    <div id="season-pill" class="pill">Saison —</div>
+    <div id="season-pill" class="pill">Championnat</div>
     <div class="sync-status">
       <div class="sync-dot" id="sync-dot"></div>
       <span id="sync-text">Chargement…</span>
@@ -150,7 +150,7 @@
   <button data-tab="historique">Historique</button>
   <button data-tab="joueurs">Joueurs</button>
   <button data-tab="personnages">Personnages</button>
-  <button data-tab="saisons">Saisons</button>
+  <button data-tab="saisons">Championnats</button>
 </nav>
 
 <main>
@@ -158,7 +158,7 @@
     <div class="card">
       <h2>Classement</h2>
       <div class="row" style="margin-bottom:16px;">
-        <div style="min-width:160px;"><label for="cl-saison">Saison</label><select id="cl-saison"><option value="">Toutes les saisons</option></select></div>
+        <div style="min-width:160px;"><label for="cl-saison">Championnat</label><select id="cl-saison"><option value="">Tous les championnats</option></select></div>
         <div style="min-width:160px;"><label for="cl-mode">Filtrer par</label>
           <select id="cl-mode">
             <option value="">— Total général —</option>
@@ -176,7 +176,7 @@
     <div class="card edit-only">
       <h2 id="match-title">Nouveau match</h2>
       <div class="row" style="margin-bottom:18px;">
-        <div><label for="m-saison">Saison</label><select id="m-saison"></select></div>
+        <div><label for="m-saison">Championnat</label><select id="m-saison"></select></div>
         <div><label for="m-date">Date</label><input type="date" id="m-date"></div>
         <div><label for="m-label">Étape / Journée (optionnel)</label><input type="text" id="m-label" placeholder="ex : Finale…"></div>
       </div>
@@ -194,7 +194,7 @@
   <section class="panel" id="tab-historique">
     <div class="card">
       <h2>Historique</h2>
-      <div style="margin-bottom:16px;max-width:240px;"><label for="hist-saison">Saison</label><select id="hist-saison"><option value="">Toutes</option></select></div>
+      <div style="margin-bottom:16px;max-width:240px;"><label for="hist-saison">Championnat</label><select id="hist-saison"><option value="">Tous</option></select></div>
       <div id="historique-out"></div>
     </div>
   </section>
@@ -225,10 +225,10 @@
 
   <section class="panel" id="tab-saisons">
     <div class="card">
-      <h2>Saisons</h2>
-      <p class="hint">La saison active est sélectionnée par défaut pour les nouveaux matchs.</p>
+      <h2>Championnats</h2>
+      <p class="hint">Le championnat actif est sélectionné par défaut pour les nouveaux matchs.</p>
       <div class="row edit-only" style="margin-bottom:0;">
-        <div><input type="text" id="new-season" placeholder="ex : Saison 2"></div>
+        <div><input type="text" id="new-season" placeholder="ex : Championnat 2"></div>
         <div style="flex:none;display:flex;align-items:flex-end;"><button class="btn btn-gold btn-sm" id="add-season-btn">Créer</button></div>
       </div>
       <div class="list-rows" id="season-list"></div>
@@ -425,7 +425,7 @@ function renderSeasons(){
     const active=s.id===data.currentSeasonId, count=data.matches.filter(m=>m.seasonId===s.id).length;
     return `<div class="list-item"><div><div class="name">${esc(s.name)} ${active?'<span style="color:var(--gold-bright);font-size:11px;">● Active</span>':''}</div><div class="meta">${count} match${count!==1?'s':''}</div></div>
     <div class="actions">
-      ${!active?`<button class="btn btn-ghost btn-sm edit-only" onclick="setAS('${s.id}')">Définir active</button>`:''}
+      ${!active?`<button class="btn btn-ghost btn-sm edit-only" onclick="setAS('${s.id}')">Définir actif</button>`:''}
       <button class="btn btn-ghost btn-sm edit-only" onclick="renameS('${s.id}')">Renommer</button>
       <button class="btn btn-danger btn-sm edit-only" onclick="delS('${s.id}')" ${count>0?'disabled':''}>Supprimer</button>
     </div></div>`;
@@ -435,13 +435,13 @@ document.getElementById('add-season-btn').addEventListener('click',()=>{
   if(!reqEdit())return;
   const name=document.getElementById('new-season').value.trim();
   if(!name)return;
-  if(data.seasons.some(s=>s.name.toLowerCase()===name.toLowerCase())){toast('Cette saison existe déjà');return;}
+  if(data.seasons.some(s=>s.name.toLowerCase()===name.toLowerCase())){toast('Ce championnat existe déjà');return;}
   const s={id:uid(),name,at:Date.now()}; data.seasons.push(s); data.currentSeasonId=s.id;
-  document.getElementById('new-season').value=''; save(); renderAll(); toast('Saison créée et activée');
+  document.getElementById('new-season').value=''; save(); renderAll(); toast('Championnat créé et activé');
 });
-window.setAS=id=>{if(!reqEdit())return;data.currentSeasonId=id;save();renderAll();toast('Saison active changée');};
+window.setAS=id=>{if(!reqEdit())return;data.currentSeasonId=id;save();renderAll();toast('Championnat actif changé');};
 window.renameS=id=>{if(!reqEdit())return;const s=gs(id);if(!s)return;const n=prompt('Nouveau nom :',s.name);if(!n?.trim())return;s.name=n.trim();save();renderAll();};
-window.delS=id=>{if(!reqEdit())return;if(data.matches.some(m=>m.seasonId===id)){toast('Impossible : des matchs existent dans cette saison');return;}data.seasons=data.seasons.filter(s=>s.id!==id);if(!data.seasons.length){data.seasons.push({id:uid(),name:'Saison 1',at:Date.now()});}if(!data.seasons.some(s=>s.id===data.currentSeasonId))data.currentSeasonId=data.seasons[0].id;save();renderAll();};
+window.delS=id=>{if(!reqEdit())return;if(data.matches.some(m=>m.seasonId===id)){toast('Impossible : des matchs existent dans ce championnat');return;}data.seasons=data.seasons.filter(s=>s.id!==id);if(!data.seasons.length){data.seasons.push({id:uid(),name:'Saison 1',at:Date.now()});}if(!data.seasons.some(s=>s.id===data.currentSeasonId))data.currentSeasonId=data.seasons[0].id;save();renderAll();};
 
 // ── Match form ────────────────────────────────────────────
 function popts(sel=''){return data.players.map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${esc(p.name)}</option>`).join('');}
@@ -614,10 +614,10 @@ document.getElementById('reset-btn').addEventListener('click',()=>{
 
 // ── renderAll ─────────────────────────────────────────────
 function renderAll(){
-  document.getElementById('season-pill').textContent=data.currentSeasonId?sn(data.currentSeasonId):'Saison —';
-  const sopts='<option value="">Toutes les saisons</option>'+data.seasons.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  document.getElementById('season-pill').textContent=data.currentSeasonId?sn(data.currentSeasonId):'Championnat';
+  const sopts='<option value="">Tous les championnats</option>'+data.seasons.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
   document.getElementById('cl-saison').innerHTML=sopts;
-  document.getElementById('hist-saison').innerHTML='<option value="">Toutes</option>'+data.seasons.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  document.getElementById('hist-saison').innerHTML='<option value="">Tous</option>'+data.seasons.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
   renderPlayers();renderChamps();renderSeasons();renderClassement();renderHistorique();
   // Rafraîchir le select saison du formulaire de match
   const mSaison=document.getElementById('m-saison');
