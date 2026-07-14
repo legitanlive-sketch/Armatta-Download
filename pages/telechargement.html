@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARMATTA — Téléchargement</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #080808;
+    --surface: #111;
+    --card: #1c1c1c;
+    --gold: #c8903a;
+    --gold-bright: #e8a33d;
+    --gold-dim: rgba(200,144,58,.12);
+    --text: #f0ece4;
+    --text-dim: #666;
+    --border: rgba(255,255,255,.06);
+    --border-bright: rgba(255,255,255,.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.08) 2px, rgba(0,0,0,.08) 4px);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── Header ── */
+  header {
+    position: relative; z-index: 1;
+    border-bottom: 1px solid var(--border);
+    padding: 20px 40px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
+  .back-link {
+    display: flex; align-items: center; gap: 8px;
+    text-decoration: none; color: var(--text-dim); font-size: 13px;
+    transition: color .15s;
+  }
+  .back-link:hover { color: var(--gold-bright); }
+  .back-link svg { width: 16px; height: 16px; }
+
+  .brand {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .brand img { height: 32px; filter: invert(1); }
+  .page-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: .2em; text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  /* ── Main ── */
+  main {
+    position: relative; z-index: 1;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 64px 24px 80px;
+  }
+
+  .section-label {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: .3em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 32px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .section-label::after {
+    content: ''; flex: 1; height: 1px;
+    background: var(--border-bright);
+  }
+
+  /* ── Carte téléchargement ── */
+  .dl-card {
+    border: 1px solid var(--border-bright);
+    background: rgba(255,255,255,.02);
+    padding: 32px;
+    display: flex; align-items: center; gap: 28px; flex-wrap: wrap;
+    clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+    transition: border-color .2s;
+  }
+  .dl-card:hover { border-color: var(--gold); }
+
+  .dl-icon {
+    font-size: 48px; flex-shrink: 0;
+    filter: drop-shadow(0 0 16px rgba(200,144,58,.3));
+  }
+
+  .dl-info { flex: 1; min-width: 200px; }
+  .dl-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase;
+    color: var(--gold-bright); margin-bottom: 8px;
+  }
+  .dl-desc {
+    font-size: 13px; color: var(--text-dim); line-height: 1.6;
+    margin-bottom: 14px;
+  }
+  .dl-meta {
+    display: flex; gap: 16px; flex-wrap: wrap;
+  }
+  .dl-tag {
+    font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text-dim); border: 1px solid var(--border-bright);
+    padding: 3px 10px;
+  }
+
+  .dl-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase;
+    background: var(--gold-dim); border: 1px solid var(--gold);
+    color: var(--gold-bright); padding: 13px 24px;
+    clip-path: polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+    transition: all .2s; flex-shrink: 0;
+  }
+  .dl-btn:hover { background: rgba(200,144,58,.25); }
+  .dl-btn svg { width: 16px; height: 16px; }
+
+  /* ── Bientôt ── */
+  .coming-soon {
+    margin-top: 48px;
+    border: 1px dashed var(--border-bright);
+    padding: 28px 32px;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .coming-soon-icon { font-size: 28px; opacity: .4; }
+  .coming-soon-text { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+  .coming-soon-text strong { color: var(--text); font-weight: 500; }
+
+  /* ── Footer ── */
+  footer {
+    position: relative; z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 24px 40px;
+    text-align: center;
+    font-size: 11px; color: #333; letter-spacing: .05em;
+  }
+
+  @media(max-width:560px){
+    header { padding: 16px 20px; }
+    main { padding: 40px 20px 60px; }
+    .dl-card { padding: 22px; }
+    .dl-btn { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="back-link">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Retour
+  </a>
+  <a href="index.html" class="brand" style="text-decoration:none;">
+    <img src="TITRE%20Armatta.png" alt="Armatta">
+  </a>
+  <span class="page-title">Téléchargement</span>
+  <div></div>
+</header>
+
+<main>
+  <p class="section-label">Ressources officielles</p>
+
+  <div class="dl-card">
+    <div class="dl-icon">📖</div>
+    <div class="dl-info">
+      <div class="dl-name">Livre de règles</div>
+      <p class="dl-desc">Le guide complet du jeu — mécaniques, champions, factions, Arsenal et conditions de victoire. Version 1.0.</p>
+      <div class="dl-meta">
+        <span class="dl-tag">PDF</span>
+        <span class="dl-tag">Version 1.0</span>
+        <span class="dl-tag">Français</span>
+      </div>
+    </div>
+    <a href="ARMATTA%20-%20LIVRE%20DE%20REGLES%20V1.0.pdf" download class="dl-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v13M6 11l6 6 6-6"/><path d="M3 21h18"/></svg>
+      Télécharger
+    </a>
+  </div>
+
+  <div class="coming-soon">
+    <div class="coming-soon-icon">🔜</div>
+    <div class="coming-soon-text">
+      <strong>Bientôt disponible</strong><br>
+      Fiches de personnages, fichiers imprimables et autres ressources seront ajoutés ici prochainement.
+    </div>
+  </div>
+</main>
+
+<footer>© 2025 Ludik Wargame — Armatta, Brutal et Imprévisible</footer>
+
+</body>
+</html>

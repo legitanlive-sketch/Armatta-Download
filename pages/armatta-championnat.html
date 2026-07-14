@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARMATTA — Championnat</title>
+<style>
+  :root {
+    --bg:#0e0e0e; --surface:#161616; --card:#1c1c1c;
+    --border:rgba(255,255,255,.07); --border-bright:rgba(255,255,255,.14);
+    --gold:#c8903a; --gold-bright:#e8a33d; --gold-dim:rgba(200,144,58,.15);
+    --text:#f0ece4; --text-dim:#888; --red:#c0392b; --green:#27ae60;
+    --ordre:#3a7fc8; --ombre:#e8d43d; --sauvages:#22c55e; --basfonds:#e25822;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;min-height:100vh;}
+
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:baseline;gap:10px;}
+  .brand-title{font-size:22px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-bright);}
+  .brand-sub{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim);}
+  .header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .pill{background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold-bright);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);}
+  .btn-lock{background:none;border:1px solid var(--border-bright);color:var(--text-dim);font:inherit;font-size:12px;padding:6px 14px;cursor:pointer;letter-spacing:.05em;transition:all .15s;}
+  .btn-lock:hover{border-color:var(--gold);color:var(--gold-bright);}
+  .btn-lock.unlocked{border-color:var(--green);color:var(--green);}
+  .btn-lock.unlocked:hover{border-color:var(--red);color:var(--red);}
+
+  .lock-banner{display:none;background:rgba(200,144,58,.06);border-bottom:1px solid var(--gold);padding:9px 24px;font-size:12.5px;color:var(--gold-bright);text-align:center;}
+  body.locked .lock-banner{display:block;}
+  body.locked .edit-only{opacity:.35;pointer-events:none;}
+
+  nav{display:flex;gap:2px;padding:16px 24px 0;border-bottom:1px solid var(--border);overflow-x:auto;}
+  nav button{background:none;border:none;border-bottom:2px solid transparent;color:var(--text-dim);font:inherit;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:8px 16px 10px;cursor:pointer;white-space:nowrap;transition:all .15s;}
+  nav button:hover{color:var(--text);}
+  nav button.active{color:var(--gold-bright);border-bottom-color:var(--gold-bright);}
+
+  main{padding:24px;max-width:960px;}
+  .panel{display:none;} .panel.active{display:block;}
+  .card{background:var(--card);border:1px solid var(--border);padding:22px;margin-bottom:16px;}
+  .card h2{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-bright);margin-bottom:18px;}
+  .hint{font-size:12px;color:var(--text-dim);margin-bottom:14px;line-height:1.5;}
+
+  label{display:block;font-size:11px;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;}
+  input[type=text],input[type=date],input[type=number],input[type=password],select{background:#111;border:1px solid var(--border-bright);color:var(--text);font:inherit;font-size:13.5px;padding:8px 11px;width:100%;outline:none;transition:border-color .15s;-webkit-appearance:none;}
+  input:focus,select:focus{border-color:var(--gold);}
+  select option{background:#1c1c1c;}
+
+  .row{display:flex;gap:12px;flex-wrap:wrap;} .row>div{flex:1;min-width:140px;}
+
+  .btn{font:inherit;font-size:12.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;border:1px solid;padding:8px 18px;cursor:pointer;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);transition:all .15s;}
+  .btn-gold{background:var(--gold-dim);border-color:var(--gold);color:var(--gold-bright);}
+  .btn-gold:hover{background:rgba(200,144,58,.28);}
+  .btn-ghost{background:transparent;border-color:var(--border-bright);color:var(--text-dim);}
+  .btn-ghost:hover{border-color:var(--text-dim);color:var(--text);}
+  .btn-danger{background:transparent;border-color:rgba(192,57,43,.5);color:var(--red);}
+  .btn-danger:hover{background:rgba(192,57,43,.12);}
+  .btn-sm{font-size:11.5px;padding:5px 12px;}
+
+  .list-item{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--border);gap:10px;}
+  .list-item:last-child{border-bottom:none;}
+  .list-item .name{font-weight:600;}
+  .list-item .meta{font-size:12px;color:var(--text-dim);}
+  .list-item .actions{display:flex;gap:6px;flex-shrink:0;}
+  .list-rows{border:1px solid var(--border);margin-top:12px;}
+  .empty{padding:24px;text-align:center;color:var(--text-dim);font-size:13px;border:1px dashed var(--border-bright);}
+
+  .chip{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border:1px solid;clip-path:polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%);}
+  .chip-Ordre{color:var(--ordre);border-color:var(--ordre);background:rgba(58,127,200,.1);}
+  .chip-Ombre{color:var(--ombre);border-color:var(--ombre);background:rgba(232,212,61,.1);}
+  .chip-Sauvages{color:var(--sauvages);border-color:var(--sauvages);background:rgba(34,197,94,.1);}
+  .chip-BasFonds{color:var(--basfonds);border-color:var(--basfonds);background:rgba(226,88,34,.1);}
+
+  .p-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--border);}
+  .p-row:last-child{border-bottom:none;}
+  .p-row>div{flex:1;min-width:120px;}
+  .p-row .glory-col{flex:0 0 100px;}
+  .p-row .winner-col{flex:0 0 auto;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-dim);white-space:nowrap;}
+  .p-row .winner-col input[type=radio]{accent-color:var(--gold);width:15px;height:15px;}
+  .p-row .remove-btn{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px;padding:0 4px;}
+  .p-row .remove-btn:hover{color:var(--red);}
+
+  .classement-table{width:100%;border-collapse:collapse;}
+  .classement-table th{text-align:left;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);padding:8px 12px;border-bottom:1px solid var(--border-bright);}
+  .classement-table td{padding:10px 12px;border-bottom:1px solid var(--border);}
+  .classement-table tr:last-child td{border-bottom:none;}
+  .classement-table tr:hover td{background:rgba(255,255,255,.02);}
+  .rank{font-weight:900;font-size:16px;width:32px;}
+  .rank-1{color:#ffd700;} .rank-2{color:#c0c0c0;} .rank-3{color:#cd7f32;}
+  .pts{font-weight:700;font-size:16px;color:var(--gold-bright);}
+  .stat{font-size:12.5px;color:var(--text-dim);}
+
+  .match-card{border:1px solid var(--border);margin-bottom:10px;overflow:hidden;}
+  .match-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.02);flex-wrap:wrap;gap:8px;}
+  .match-header .date{font-size:12px;color:var(--text-dim);}
+  .match-header .label-tag{color:var(--gold-bright);}
+  .match-header .hactions{display:flex;gap:6px;}
+  .match-participants{padding:10px 14px 12px;display:flex;flex-direction:column;gap:6px;}
+  .p-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .p-line .pname{font-weight:600;min-width:80px;}
+  .p-line .glory{font-size:12px;color:var(--text-dim);}
+  .p-line .ptsbadge{font-size:12px;font-weight:700;color:var(--gold-bright);}
+  .crown{color:#ffd700;font-size:14px;margin-right:2px;}
+
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#222;border:1px solid var(--border-bright);color:var(--text);padding:10px 22px;font-size:13.5px;font-weight:600;transition:transform .25s ease,opacity .25s ease;opacity:0;z-index:999;clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);white-space:nowrap;max-width:90vw;pointer-events:none;}
+  #toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+  .sync-status{font-size:12px;display:flex;align-items:center;gap:6px;color:var(--text-dim);}
+  .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--text-dim);}
+  .sync-dot.ok{background:var(--green);} .sync-dot.err{background:var(--red);} .sync-dot.loading{background:var(--gold);animation:pulse 1s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+  footer{border-top:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  .footer-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+
+  @media(max-width:560px){
+    header,main,footer{padding-left:14px;padding-right:14px;}
+    nav{padding-left:14px;}
+    .p-row{flex-direction:column;align-items:flex-start;}
+    .p-row .glory-col{flex:1;width:100%;}
+  }
+</style>
+</head>
+<body class="locked">
+
+<header>
+  <div class="brand">
+    <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+      <img src="TITRE%20Armatta.png" alt="Armatta" style="height:28px;filter:invert(1);opacity:.9;">
+    </a>
+    <span class="brand-sub">Championnat</span>
+  </div>
+  <div class="header-right">
+    <div id="season-pill" class="pill">Championnat</div>
+    <div class="sync-status">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-text">Chargement…</span>
+    </div>
+    <button class="btn-lock" id="btn-lock">🔒 Mode organisateur</button>
+  </div>
+</header>
+
+<div class="lock-banner">
+  Mode spectateur — lecture seule. Clique sur « Mode organisateur » pour modifier.
+</div>
+
+<nav>
+  <button class="active" data-tab="classement">Classement</button>
+  <button data-tab="match">Nouveau match</button>
+  <button data-tab="historique">Historique</button>
+  <button data-tab="joueurs">Joueurs</button>
+  <button data-tab="personnages">Personnages</button>
+  <button data-tab="saisons">Championnats</button>
+</nav>
+
+<main>
+  <section class="panel active" id="tab-classement">
+    <div class="card">
+      <h2>Classement</h2>
+      <div class="row" style="margin-bottom:16px;">
+        <div style="min-width:160px;"><label for="cl-saison">Championnat</label><select id="cl-saison"><option value="">Tous les championnats</option></select></div>
+        <div style="min-width:160px;"><label for="cl-mode">Filtrer par</label>
+          <select id="cl-mode">
+            <option value="">— Total général —</option>
+            <option value="faction">Faction</option>
+            <option value="personnage">Personnage</option>
+          </select>
+        </div>
+        <div id="cl-filter-wrap" style="min-width:160px;display:none;"><label for="cl-filter">Valeur</label><select id="cl-filter"></select></div>
+      </div>
+      <div id="classement-out"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-match">
+    <div class="card edit-only">
+      <h2 id="match-title">Nouveau match</h2>
+      <div class="row" style="margin-bottom:18px;">
+        <div><label for="m-saison">Championnat</label><select id="m-saison"></select></div>
+        <div><label for="m-date">Date</label><input type="date" id="m-date"></div>
+        <div><label for="m-label">Étape / Journée (optionnel)</label><input type="text" id="m-label" placeholder="ex : Finale…"></div>
+      </div>
+      <label style="margin-bottom:10px;">Participants (2 à 4 joueurs)</label>
+      <p class="hint" style="margin-top:-4px;">Le gagnant coche « Sorti » (10 pts). Les autres marquent leurs jetons de gloire.</p>
+      <div id="p-rows"></div>
+      <div style="margin-top:10px;"><button class="btn btn-ghost btn-sm" id="add-row-btn">+ Ajouter un joueur</button></div>
+      <div style="display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+        <button class="btn btn-gold" id="submit-match-btn">Enregistrer le match</button>
+        <button class="btn btn-ghost" id="cancel-edit-btn" style="display:none;">Annuler</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-historique">
+    <div class="card">
+      <h2>Historique</h2>
+      <div style="margin-bottom:16px;max-width:240px;"><label for="hist-saison">Championnat</label><select id="hist-saison"><option value="">Tous</option></select></div>
+      <div id="historique-out"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-joueurs">
+    <div class="card">
+      <h2>Joueurs</h2>
+      <div class="row edit-only" style="margin-bottom:0;">
+        <div><input type="text" id="new-player" placeholder="Nom du joueur"></div>
+        <div style="flex:none;display:flex;align-items:flex-end;"><button class="btn btn-gold btn-sm" id="add-player-btn">Ajouter</button></div>
+      </div>
+      <div class="list-rows" id="player-list"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-personnages">
+    <div class="card">
+      <h2>Personnages</h2>
+      <p class="hint">Chaque personnage est rattaché à une faction. Cette liste alimente le formulaire de match.</p>
+      <div class="row edit-only" style="flex-wrap:wrap;margin-bottom:0;">
+        <div><input type="text" id="new-champ" placeholder="Nom du personnage"></div>
+        <div style="flex:none;min-width:150px;"><select id="new-champ-faction"><option value="">— Faction —</option><option value="Ordre">Ordre</option><option value="Ombre">Ombre</option><option value="Sauvages">Les Sauvages</option><option value="BasFonds">Bas-Fonds</option></select></div>
+        <div style="flex:none;display:flex;align-items:flex-end;"><button class="btn btn-gold btn-sm" id="add-champ-btn">Ajouter</button></div>
+      </div>
+      <div class="list-rows" id="champ-list"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-saisons">
+    <div class="card">
+      <h2>Championnats</h2>
+      <p class="hint">Le championnat actif est sélectionné par défaut pour les nouveaux matchs.</p>
+      <div class="row edit-only" style="margin-bottom:0;">
+        <div><input type="text" id="new-season" placeholder="ex : Championnat 2"></div>
+        <div style="flex:none;display:flex;align-items:flex-end;"><button class="btn btn-gold btn-sm" id="add-season-btn">Créer</button></div>
+      </div>
+      <div class="list-rows" id="season-list"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div id="footer-note" style="font-size:12px;color:var(--text-dim);">Données stockées en ligne via JSONBin.</div>
+  <div class="footer-actions">
+    <button class="btn btn-ghost btn-sm" id="export-btn">Exporter JSON</button>
+    <label class="btn btn-ghost btn-sm edit-only" style="cursor:pointer;">Importer JSON<input type="file" id="import-input" accept="application/json" style="display:none;"></label>
+    <button class="btn btn-danger btn-sm edit-only" id="reset-btn">Réinitialiser</button>
+  </div>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+// ═══════════════════════════════════════════════════════
+//  🔧 CONFIGURATION — à remplir avant de partager
+// ═══════════════════════════════════════════════════════
+const CONFIG = {
+  // Étape 1 : Créer un compte gratuit sur https://jsonbin.io
+  // Étape 2 : Créer un Bin vide ({}) → coller son ID ici :
+  binId: "6a38cc2cda38895dfee9a2d7",
+
+  // Étape 3 : Account → API Keys → Master Key → coller ici :
+  apiKey: "$2a$10$0zRlw5nChOW7n3TtfK9YJ.gTh7r7UEmCX0bUUtFUWSVAXMPB6ahVS",
+
+  // Étape 4 : Mot de passe que les organisateurs saisissent :
+  editPassword: "Armatta2025!"
+};
+// ═══════════════════════════════════════════════════════
+
+const FL = {Ordre:"Ordre",Ombre:"Ombre",Sauvages:"Les Sauvages",BasFonds:"Bas-Fonds"};
+const FACTIONS = Object.keys(FL);
+const RESET_PWD = "Azerty5+";
+
+let data={players:[],champions:[],seasons:[],currentSeasonId:null,matches:[]};
+let isEditor=false, editingMatchId=null, pRows=[];
+
+function uid(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36);}
+function today(){return new Date().toISOString().slice(0,10);}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function gp(id){return data.players.find(p=>p.id===id);}
+function gc(id){return data.champions.find(c=>c.id===id);}
+function gs(id){return data.seasons.find(s=>s.id===id);}
+function pn(id){return gp(id)?.name??'(joueur supprimé)';}
+function cn(id){return gc(id)?.name??'(personnage supprimé)';}
+function cf(id){return gc(id)?.faction??null;}
+function sn(id){return gs(id)?.name??'(saison supprimée)';}
+function fl(f){return FL[f]||f||'—';}
+
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(toast._t); toast._t=setTimeout(()=>el.classList.remove('show'),2600);
+}
+function reqEdit(){if(!isEditor){toast("Mode organisateur requis pour modifier");return false;}return true;}
+function configOk(){return CONFIG.binId&&!CONFIG.binId.includes('COLLE')&&CONFIG.apiKey&&!CONFIG.apiKey.includes('COLLE');}
+
+// ── JSONBin ──────────────────────────────────────────────
+const BURL=()=>`https://api.jsonbin.io/v3/b/${CONFIG.binId}`;
+async function remoteLoad(){
+  if(!configOk())return null;
+  const r=await fetch(BURL()+'/latest',{headers:{'X-Master-Key':CONFIG.apiKey,'X-Bin-Meta':'false'}});
+  if(!r.ok)throw new Error('load-'+r.status);
+  return await r.json();
+}
+async function remoteSave(payload){
+  if(!configOk())throw new Error('not-configured');
+  const r=await fetch(BURL(),{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':CONFIG.apiKey,'X-Bin-Versioning':'false'},body:JSON.stringify(payload)});
+  if(!r.ok)throw new Error('save-'+r.status);
+}
+
+function syncUI(state,text){
+  document.getElementById('sync-dot').className='sync-dot '+state;
+  document.getElementById('sync-text').textContent=text;
+}
+
+function ensureShape(){
+  ['players','champions','seasons','matches'].forEach(k=>{if(!Array.isArray(data[k]))data[k]=[];});
+  if(!data.champions.length){data.champions.push({id:uid(),name:'Echo',faction:'Ordre'});data.champions.push({id:uid(),name:'Morwen',faction:'Ordre'});}
+  if(!data.seasons.length)data.seasons.push({id:uid(),name:'Saison 1',at:Date.now()});
+  if(!data.currentSeasonId||!data.seasons.some(s=>s.id===data.currentSeasonId))data.currentSeasonId=data.seasons[0].id;
+}
+
+async function load(){
+  syncUI('loading','Chargement…');
+  try{
+    const remote=await remoteLoad();
+    if(remote&&Array.isArray(remote.players))data=remote;
+  }catch(e){
+    if(!configOk()){syncUI('err','Non configuré');document.getElementById('footer-note').textContent='Configuration manquante — remplis le bloc CONFIG dans le fichier HTML.';}
+    else{syncUI('err','Erreur de chargement');}
+  }
+  ensureShape();
+  syncUI('ok','Synchronisé');
+  renderAll();
+}
+
+async function save(){
+  syncUI('loading','Enregistrement…');
+  try{await remoteSave(data);syncUI('ok','Synchronisé');}
+  catch(e){syncUI('err','Erreur d\'enregistrement');toast('Erreur d\'enregistrement — vérifie ta connexion');}
+}
+
+// ── Tabs ──────────────────────────────────────────────────
+document.querySelectorAll('nav button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ── Lock ─────────────────────────────────────────────────
+document.getElementById('btn-lock').addEventListener('click',()=>{
+  if(isEditor){
+    isEditor=false; document.body.classList.add('locked');
+    document.getElementById('btn-lock').textContent='🔒 Mode organisateur';
+    document.getElementById('btn-lock').classList.remove('unlocked');
+    toast('Mode spectateur activé');
+  } else {
+    const pwd=prompt('Mot de passe organisateur :');
+    if(pwd===null)return;
+    if(pwd!==CONFIG.editPassword){toast('Mot de passe incorrect');return;}
+    isEditor=true; document.body.classList.remove('locked');
+    document.getElementById('btn-lock').textContent='🔓 Organisateur — verrouiller';
+    document.getElementById('btn-lock').classList.add('unlocked');
+    toast('Mode organisateur activé');
+  }
+});
+
+// ── Players ───────────────────────────────────────────────
+function renderPlayers(){
+  const el=document.getElementById('player-list');
+  if(!data.players.length){el.innerHTML='<div class="empty">Aucun joueur pour l\'instant.</div>';return;}
+  el.innerHTML=data.players.map(p=>{
+    const used=data.matches.some(m=>m.participants.some(x=>x.playerId===p.id));
+    return `<div class="list-item"><div><div class="name">${esc(p.name)}</div><div class="meta">${used?'A déjà joué':'Aucun match'}</div></div>
+    <div class="actions">
+      <button class="btn btn-ghost btn-sm edit-only" onclick="renamePlayer('${p.id}')">Renommer</button>
+      <button class="btn btn-danger btn-sm edit-only" onclick="delPlayer('${p.id}')" ${used?'disabled':''}>Supprimer</button>
+    </div></div>`;
+  }).join('');
+}
+document.getElementById('add-player-btn').addEventListener('click',()=>{
+  if(!reqEdit())return;
+  const inp=document.getElementById('new-player'), name=inp.value.trim();
+  if(!name)return;
+  if(data.players.some(p=>p.name.toLowerCase()===name.toLowerCase())){toast('Ce joueur existe déjà');return;}
+  data.players.push({id:uid(),name}); inp.value=''; save(); renderAll();
+});
+document.getElementById('new-player').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('add-player-btn').click();});
+window.renamePlayer=id=>{if(!reqEdit())return;const p=gp(id);if(!p)return;const n=prompt('Nouveau nom :',p.name);if(!n?.trim())return;p.name=n.trim();save();renderAll();toast('Joueur renommé');};
+window.delPlayer=id=>{if(!reqEdit())return;if(data.matches.some(m=>m.participants.some(x=>x.playerId===id))){toast('Impossible : ce joueur a des matchs');return;}data.players=data.players.filter(p=>p.id!==id);save();renderAll();};
+
+// ── Champions ─────────────────────────────────────────────
+function renderChamps(){
+  const el=document.getElementById('champ-list');
+  if(!data.champions.length){el.innerHTML='<div class="empty">Aucun personnage.</div>';return;}
+  el.innerHTML=data.champions.map(c=>{
+    const used=data.matches.some(m=>m.participants.some(x=>x.champId===c.id));
+    return `<div class="list-item"><div style="display:flex;align-items:center;gap:10px;"><div class="name">${esc(c.name)}</div><span class="chip chip-${c.faction||''}">${fl(c.faction)}</span></div>
+    <div class="actions">
+      <button class="btn btn-ghost btn-sm edit-only" onclick="renameChamp('${c.id}')">Renommer</button>
+      <button class="btn btn-danger btn-sm edit-only" onclick="delChamp('${c.id}')" ${used?'disabled':''}>Supprimer</button>
+    </div></div>`;
+  }).join('');
+}
+document.getElementById('add-champ-btn').addEventListener('click',()=>{
+  if(!reqEdit())return;
+  const name=document.getElementById('new-champ').value.trim(), faction=document.getElementById('new-champ-faction').value;
+  if(!name||!faction){toast('Nom et faction requis');return;}
+  if(data.champions.some(c=>c.name.toLowerCase()===name.toLowerCase())){toast('Ce personnage existe déjà');return;}
+  data.champions.push({id:uid(),name,faction});
+  document.getElementById('new-champ').value=''; document.getElementById('new-champ-faction').value='';
+  save(); renderAll();
+});
+window.renameChamp=id=>{if(!reqEdit())return;const c=gc(id);if(!c)return;const n=prompt('Nouveau nom :',c.name);if(!n?.trim())return;c.name=n.trim();save();renderAll();toast('Personnage renommé');};
+window.delChamp=id=>{if(!reqEdit())return;if(data.matches.some(m=>m.participants.some(x=>x.champId===id))){toast('Impossible : ce personnage a des matchs');return;}data.champions=data.champions.filter(c=>c.id!==id);save();renderAll();};
+
+// ── Seasons ───────────────────────────────────────────────
+function renderSeasons(){
+  const el=document.getElementById('season-list');
+  if(!data.seasons.length){el.innerHTML='<div class="empty">Aucune saison.</div>';return;}
+  el.innerHTML=data.seasons.map(s=>{
+    const active=s.id===data.currentSeasonId, count=data.matches.filter(m=>m.seasonId===s.id).length;
+    return `<div class="list-item"><div><div class="name">${esc(s.name)} ${active?'<span style="color:var(--gold-bright);font-size:11px;">● Active</span>':''}</div><div class="meta">${count} match${count!==1?'s':''}</div></div>
+    <div class="actions">
+      ${!active?`<button class="btn btn-ghost btn-sm edit-only" onclick="setAS('${s.id}')">Définir actif</button>`:''}
+      <button class="btn btn-ghost btn-sm edit-only" onclick="renameS('${s.id}')">Renommer</button>
+      <button class="btn btn-danger btn-sm edit-only" onclick="delS('${s.id}')" ${count>0?'disabled':''}>Supprimer</button>
+    </div></div>`;
+  }).join('');
+}
+document.getElementById('add-season-btn').addEventListener('click',()=>{
+  if(!reqEdit())return;
+  const name=document.getElementById('new-season').value.trim();
+  if(!name)return;
+  if(data.seasons.some(s=>s.name.toLowerCase()===name.toLowerCase())){toast('Ce championnat existe déjà');return;}
+  const s={id:uid(),name,at:Date.now()}; data.seasons.push(s); data.currentSeasonId=s.id;
+  document.getElementById('new-season').value=''; save(); renderAll(); toast('Championnat créé et activé');
+});
+window.setAS=id=>{if(!reqEdit())return;data.currentSeasonId=id;save();renderAll();toast('Championnat actif changé');};
+window.renameS=id=>{if(!reqEdit())return;const s=gs(id);if(!s)return;const n=prompt('Nouveau nom :',s.name);if(!n?.trim())return;s.name=n.trim();save();renderAll();};
+window.delS=id=>{if(!reqEdit())return;if(data.matches.some(m=>m.seasonId===id)){toast('Impossible : des matchs existent dans ce championnat');return;}data.seasons=data.seasons.filter(s=>s.id!==id);if(!data.seasons.length){data.seasons.push({id:uid(),name:'Saison 1',at:Date.now()});}if(!data.seasons.some(s=>s.id===data.currentSeasonId))data.currentSeasonId=data.seasons[0].id;save();renderAll();};
+
+// ── Match form ────────────────────────────────────────────
+function popts(sel=''){return data.players.map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${esc(p.name)}</option>`).join('');}
+function copts(sel=''){return data.champions.map(c=>`<option value="${c.id}" ${c.id===sel?'selected':''}>${esc(c.name)} — ${fl(c.faction)}</option>`).join('');}
+
+function resetForm(){
+  editingMatchId=null; pRows=[];
+  document.getElementById('match-title').textContent='Nouveau match';
+  document.getElementById('m-date').value=today();
+  document.getElementById('m-label').value='';
+  document.getElementById('cancel-edit-btn').style.display='none';
+  document.getElementById('submit-match-btn').textContent='Enregistrer le match';
+  const s=gs(data.currentSeasonId)||data.seasons[0];
+  const sel=document.getElementById('m-saison');
+  sel.innerHTML=data.seasons.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  if(s)sel.value=s.id;
+  pRows.push({rowId:uid(),playerId:'',champId:'',glory:0,winner:false});
+  pRows.push({rowId:uid(),playerId:'',champId:'',glory:0,winner:false});
+  renderPRows();
+}
+
+function renderPRows(){
+  const c=document.getElementById('p-rows');
+  c.innerHTML=pRows.map(row=>`
+    <div class="p-row" data-rid="${row.rowId}">
+      <div><label>Joueur</label><select class="pp" data-rid="${row.rowId}"><option value="">— Choisir —</option>${popts(row.playerId)}</select></div>
+      <div><label>Personnage</label><select class="pc" data-rid="${row.rowId}"><option value="">— Choisir —</option>${copts(row.champId)}</select></div>
+      <div class="glory-col"><label>Gloire</label><input type="number" class="pg" data-rid="${row.rowId}" min="0" max="20" value="${row.glory}"></div>
+      <div class="winner-col"><input type="radio" name="winner" value="${row.rowId}" ${row.winner?'checked':''}> Sorti (10 pts)</div>
+      ${pRows.length>2?`<button class="remove-btn" data-rid="${row.rowId}" title="Retirer">✕</button>`:''}
+    </div>`).join('');
+  c.querySelectorAll('.pp').forEach(s=>s.addEventListener('change',e=>{pRows.find(r=>r.rowId===e.target.dataset.rid).playerId=e.target.value;}));
+  c.querySelectorAll('.pc').forEach(s=>s.addEventListener('change',e=>{pRows.find(r=>r.rowId===e.target.dataset.rid).champId=e.target.value;}));
+  c.querySelectorAll('.pg').forEach(i=>i.addEventListener('change',e=>{pRows.find(r=>r.rowId===e.target.dataset.rid).glory=parseInt(e.target.value)||0;}));
+  c.querySelectorAll('input[name=winner]').forEach(i=>i.addEventListener('change',e=>{pRows.forEach(r=>r.winner=(r.rowId===e.target.value));}));
+  c.querySelectorAll('.remove-btn').forEach(b=>b.addEventListener('click',e=>{if(!reqEdit())return;pRows=pRows.filter(r=>r.rowId!==e.target.dataset.rid);renderPRows();}));
+  document.getElementById('add-row-btn').disabled=pRows.length>=4;
+  document.getElementById('add-row-btn').style.opacity=pRows.length>=4?0.4:1;
+}
+
+document.getElementById('add-row-btn').addEventListener('click',()=>{
+  if(!reqEdit())return;if(pRows.length>=4)return;
+  pRows.push({rowId:uid(),playerId:'',champId:'',glory:0,winner:false});renderPRows();
+});
+document.getElementById('cancel-edit-btn').addEventListener('click',resetForm);
+document.getElementById('submit-match-btn').addEventListener('click',()=>{
+  if(!reqEdit())return;
+  if(pRows.length<2){toast('Il faut au moins 2 joueurs');return;}
+  for(const r of pRows){if(!r.playerId){toast('Sélectionne un joueur pour chaque ligne');return;}if(!r.champId){toast('Sélectionne un personnage pour chaque ligne');return;}}
+  if(new Set(pRows.map(r=>r.playerId)).size!==pRows.length){toast('Un joueur ne peut pas apparaître deux fois');return;}
+  if(new Set(pRows.map(r=>r.champId)).size!==pRows.length){toast('Un personnage ne peut pas apparaître deux fois');return;}
+  const m={id:editingMatchId||uid(),seasonId:document.getElementById('m-saison').value,date:document.getElementById('m-date').value,label:document.getElementById('m-label').value.trim(),participants:pRows.map(r=>({playerId:r.playerId,champId:r.champId,glory:r.glory,winner:!!r.winner}))};
+  if(editingMatchId){const idx=data.matches.findIndex(x=>x.id===editingMatchId);if(idx>=0)data.matches[idx]=m;}
+  else data.matches.push(m);
+  save();renderAll();toast(editingMatchId?'Match modifié':'Match enregistré');resetForm();
+  document.querySelector('nav button[data-tab="classement"]').click();
+});
+
+function editMatch(id){
+  if(!reqEdit())return;
+  const m=data.matches.find(x=>x.id===id);if(!m)return;
+  editingMatchId=id;
+  document.getElementById('match-title').textContent='Modifier le match';
+  document.getElementById('m-date').value=m.date;
+  document.getElementById('m-label').value=m.label||'';
+  const sel=document.getElementById('m-saison');
+  sel.innerHTML=data.seasons.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  sel.value=m.seasonId;
+  pRows=m.participants.map(p=>({rowId:uid(),playerId:p.playerId,champId:p.champId,glory:p.glory,winner:!!p.winner}));
+  renderPRows();
+  document.getElementById('cancel-edit-btn').style.display='inline-block';
+  document.getElementById('submit-match-btn').textContent='Enregistrer les modifications';
+  document.querySelector('nav button[data-tab="match"]').click();
+}
+function delMatch(id){
+  if(!reqEdit())return;
+  if(!confirm('Supprimer ce match ? Action définitive.'))return;
+  data.matches=data.matches.filter(m=>m.id!==id);save();renderAll();
+}
+
+// ── Classement ────────────────────────────────────────────
+function pts(p){return p.winner?10:p.glory;}
+
+function renderClassement(){
+  const sf=document.getElementById('cl-saison').value;
+  const mode=document.getElementById('cl-mode').value;
+  const fw=document.getElementById('cl-filter-wrap');
+  const fsel=document.getElementById('cl-filter');
+  if(mode){
+    fw.style.display='';
+    if(!fsel._mode||fsel._mode!==mode){
+      fsel.innerHTML=(mode==='faction'?FACTIONS.map(f=>`<option value="${f}">${fl(f)}</option>`):data.champions.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`)).join('');
+      fsel._mode=mode;
+    }
+  } else fw.style.display='none';
+  const fv=fsel.value;
+  const matches=data.matches.filter(m=>!sf||m.seasonId===sf);
+  const stats={};
+  const es=key=>{ if(!stats[key])stats[key]={name:'',matches:0,wins:0,glory:0,points:0}; };
+  for(const m of matches){
+    for(const p of m.participants){
+      if(mode==='faction'){
+        const f=cf(p.champId); if(fv&&f!==fv)continue;
+        const k='pf-'+p.playerId+'-'+(f||'?');
+        es(k); stats[k].name=pn(p.playerId);
+        stats[k].matches++;if(p.winner)stats[k].wins++;stats[k].glory+=p.glory;stats[k].points+=pts(p);
+      } else if(mode==='personnage'){
+        if(fv&&p.champId!==fv)continue;
+        const k='pc-'+p.playerId; es(k); stats[k].name=pn(p.playerId);
+        stats[k].matches++;if(p.winner)stats[k].wins++;stats[k].glory+=p.glory;stats[k].points+=pts(p);
+      } else {
+        const k='pl-'+p.playerId; es(k); stats[k].name=pn(p.playerId);
+        stats[k].matches++;if(p.winner)stats[k].wins++;stats[k].glory+=p.glory;stats[k].points+=pts(p);
+      }
+    }
+  }
+  const rows=Object.values(stats).sort((a,b)=>b.points-a.points||b.wins-a.wins);
+  const out=document.getElementById('classement-out');
+  if(!rows.length){out.innerHTML='<div class="empty">Aucun match enregistré.</div>';return;}
+  out.innerHTML=`<table class="classement-table"><thead><tr><th>#</th><th>Joueur</th><th class="stat">Matchs</th><th class="stat">Victoires</th><th class="stat">Gloire</th><th>Points</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td class="rank rank-${i+1}">${i+1}</td><td style="font-weight:600;">${esc(r.name)}</td><td class="stat">${r.matches}</td><td class="stat">${r.wins}</td><td class="stat">${r.glory}</td><td class="pts">${r.points}</td></tr>`).join('')}</tbody></table>`;
+}
+document.getElementById('cl-saison').addEventListener('change',renderClassement);
+document.getElementById('cl-mode').addEventListener('change',()=>{document.getElementById('cl-filter')._mode=null;renderClassement();});
+document.getElementById('cl-filter').addEventListener('change',renderClassement);
+
+// ── Historique ────────────────────────────────────────────
+function renderHistorique(){
+  const sf=document.getElementById('hist-saison').value;
+  const matches=[...data.matches].filter(m=>!sf||m.seasonId===sf).reverse();
+  const out=document.getElementById('historique-out');
+  if(!matches.length){out.innerHTML='<div class="empty">Aucun match pour l\'instant.</div>';return;}
+  out.innerHTML=matches.map(m=>`<div class="match-card">
+    <div class="match-header">
+      <div><span class="date">${m.date}</span>${m.label?` — <span class="label-tag">${esc(m.label)}</span>`:''}<span style="font-size:12px;color:var(--text-dim);margin-left:8px;">${sn(m.seasonId)}</span></div>
+      <div class="hactions">
+        <button class="btn btn-ghost btn-sm edit-only" onclick="editMatch('${m.id}')">Modifier</button>
+        <button class="btn btn-danger btn-sm edit-only" onclick="delMatch('${m.id}')">Supprimer</button>
+      </div>
+    </div>
+    <div class="match-participants">${m.participants.map(p=>`<div class="p-line">${p.winner?'<span class="crown">👑</span>':''}<span class="pname">${esc(pn(p.playerId))}</span><span class="chip chip-${cf(p.champId)||''}">${esc(cn(p.champId))}</span><span class="glory">${p.glory} gloire</span><span class="ptsbadge">+${pts(p)} pts</span></div>`).join('')}</div>
+  </div>`).join('');
+}
+document.getElementById('hist-saison').addEventListener('change',renderHistorique);
+
+// Expose to onclick
+window.editMatch=editMatch; window.delMatch=delMatch;
+
+// ── Export / Import / Reset ───────────────────────────────
+document.getElementById('export-btn').addEventListener('click',()=>{
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+  a.download='armatta-championnat.json'; a.click();
+});
+document.getElementById('import-input').addEventListener('change',e=>{
+  if(!reqEdit()){e.target.value='';return;}
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{const parsed=JSON.parse(r.result);if(!parsed||!Array.isArray(parsed.players)||!Array.isArray(parsed.matches)){toast('Fichier invalide');return;}if(!confirm('Remplacer toutes les données ? Action définitive.'))return;data=parsed;ensureShape();save();renderAll();toast('Données importées');}
+    catch{toast('Impossible de lire ce fichier');}
+  };
+  r.readAsText(file);e.target.value='';
+});
+document.getElementById('reset-btn').addEventListener('click',()=>{
+  if(!reqEdit())return;
+  const pwd=prompt('Mot de passe pour réinitialiser (supprime TOUT) :');
+  if(pwd===null)return;if(pwd!==RESET_PWD){toast('Mot de passe incorrect');return;}
+  data={players:[],champions:[],seasons:[],currentSeasonId:null,matches:[]};ensureShape();save();renderAll();toast('Données réinitialisées');
+});
+
+// ── renderAll ─────────────────────────────────────────────
+function renderAll(){
+  document.getElementById('season-pill').textContent=data.currentSeasonId?sn(data.currentSeasonId):'Championnat';
+  const sopts='<option value="">Tous les championnats</option>'+data.seasons.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  document.getElementById('cl-saison').innerHTML=sopts;
+  document.getElementById('hist-saison').innerHTML='<option value="">Tous</option>'+data.seasons.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  renderPlayers();renderChamps();renderSeasons();renderClassement();renderHistorique();
+  // Rafraîchir le select saison du formulaire de match
+  const mSaison=document.getElementById('m-saison');
+  const prevSaison=mSaison.value;
+  mSaison.innerHTML=data.seasons.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  if(prevSaison&&data.seasons.some(s=>s.id===prevSaison))mSaison.value=prevSaison;
+  else if(data.currentSeasonId)mSaison.value=data.currentSeasonId;
+  // Rafraîchir les selects joueurs/personnages dans les lignes existantes
+  renderPRows();
+}
+
+resetForm();load();
+})();
+</script>
+</body>
+</html>
