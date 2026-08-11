@@ -180,10 +180,66 @@
         <div><label for="m-date">Date</label><input type="date" id="m-date"></div>
         <div><label for="m-label">Étape / Journée (optionnel)</label><input type="text" id="m-label" placeholder="ex : Finale…"></div>
       </div>
-      <label style="margin-bottom:10px;">Participants (2 à 4 joueurs)</label>
-      <p class="hint" style="margin-top:-4px;">Le gagnant coche « Sorti » (10 pts). Les autres marquent leurs jetons de gloire.</p>
-      <div id="p-rows"></div>
-      <div style="margin-top:10px;"><button class="btn btn-ghost btn-sm" id="add-row-btn">+ Ajouter un joueur</button></div>
+      <div style="margin-bottom:18px;">
+        <label>Mode de jeu</label>
+        <div style="display:flex;gap:10px;margin-top:6px;">
+          <button class="btn btn-gold btn-sm" id="mode-solo-btn">&#9876; Chacun pour soi</button>
+          <button class="btn btn-ghost btn-sm" id="mode-team-btn">&#128737; En equipe (2v2)</button>
+        </div>
+      </div>
+
+      <div id="solo-section">
+        <label style="margin-bottom:10px;">Participants (2 a 4 joueurs)</label>
+        <p class="hint" style="margin-top:-4px;">Le gagnant coche Sorti (10 pts + sa gloire). Les autres marquent leurs jetons de gloire.</p>
+        <div id="p-rows"></div>
+        <div style="margin-top:10px;"><button class="btn btn-ghost btn-sm" id="add-row-btn">+ Ajouter un joueur</button></div>
+      </div>
+
+      <div id="team-section" style="display:none;">
+        <p class="hint">Chaque equipe choisit une faction. Les 2 joueurs prennent un personnage de cette faction. L equipe gagnante marque 10 pts + leur gloire perso. Il suffit qu un seul joueur sorte pour que l equipe gagne.</p>
+        <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:16px;">
+          <div style="flex:1;min-width:280px;border:1px solid var(--border-bright);padding:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+              <span style="font-weight:700;color:var(--gold-bright);font-size:13px;text-transform:uppercase;">Equipe 1</span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <label style="margin:0;font-size:11px;">Faction</label>
+                <select id="team1-faction" style="width:auto;padding:5px 8px;font-size:12px;">
+                  <option value="">-- Choisir --</option>
+                  <option value="Ordre">Ordre</option>
+                  <option value="Ombre">Ombre</option>
+                  <option value="Sauvages">Les Sauvages</option>
+                  <option value="BasFonds">Bas-Fonds</option>
+                </select>
+              </div>
+            </div>
+            <div id="team1-rows"></div>
+            <label style="margin-top:10px;display:flex;align-items:center;gap:8px;">
+              <input type="checkbox" id="team1-winner" style="accent-color:var(--gold);width:15px;height:15px;">
+              <span style="font-size:12px;">Cette equipe a sorti un joueur (gagnante)</span>
+            </label>
+          </div>
+          <div style="flex:1;min-width:280px;border:1px solid var(--border-bright);padding:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+              <span style="font-weight:700;color:var(--gold-bright);font-size:13px;text-transform:uppercase;">Equipe 2</span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <label style="margin:0;font-size:11px;">Faction</label>
+                <select id="team2-faction" style="width:auto;padding:5px 8px;font-size:12px;">
+                  <option value="">-- Choisir --</option>
+                  <option value="Ordre">Ordre</option>
+                  <option value="Ombre">Ombre</option>
+                  <option value="Sauvages">Les Sauvages</option>
+                  <option value="BasFonds">Bas-Fonds</option>
+                </select>
+              </div>
+            </div>
+            <div id="team2-rows"></div>
+            <label style="margin-top:10px;display:flex;align-items:center;gap:8px;">
+              <input type="checkbox" id="team2-winner" style="accent-color:var(--gold);width:15px;height:15px;">
+              <span style="font-size:12px;">Cette equipe a sorti un joueur (gagnante)</span>
+            </label>
+          </div>
+        </div>
+      </div>
       <div style="display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
         <button class="btn btn-gold" id="submit-match-btn">Enregistrer le match</button>
         <button class="btn btn-ghost" id="cancel-edit-btn" style="display:none;">Annuler</button>
@@ -448,7 +504,11 @@ function popts(sel=''){return data.players.map(p=>`<option value="${p.id}" ${p.i
 function copts(sel=''){return data.champions.map(c=>`<option value="${c.id}" ${c.id===sel?'selected':''}>${esc(c.name)} — ${fl(c.faction)}</option>`).join('');}
 
 function resetForm(){
-  editingMatchId=null; pRows=[];
+  editingMatchId=null; pRows=[]; matchMode='solo'; teamRows={1:[],2:[]};
+  document.getElementById('solo-section').style.display='';
+  document.getElementById('team-section').style.display='none';
+  document.getElementById('mode-solo-btn').className='btn btn-gold btn-sm';
+  document.getElementById('mode-team-btn').className='btn btn-ghost btn-sm';
   document.getElementById('match-title').textContent='Nouveau match';
   document.getElementById('m-date').value=today();
   document.getElementById('m-label').value='';
@@ -482,6 +542,58 @@ function renderPRows(){
   document.getElementById('add-row-btn').style.opacity=pRows.length>=4?0.4:1;
 }
 
+// ── Mode équipe ──────────────────────────────────────
+let matchMode = 'solo'; // 'solo' | 'team'
+let teamRows = { 1: [], 2: [] };
+
+document.getElementById('mode-solo-btn').addEventListener('click',()=>{
+  matchMode='solo';
+  document.getElementById('solo-section').style.display='';
+  document.getElementById('team-section').style.display='none';
+  document.getElementById('mode-solo-btn').className='btn btn-gold btn-sm';
+  document.getElementById('mode-team-btn').className='btn btn-ghost btn-sm';
+});
+document.getElementById('mode-team-btn').addEventListener('click',()=>{
+  matchMode='team';
+  document.getElementById('solo-section').style.display='none';
+  document.getElementById('team-section').style.display='';
+  document.getElementById('mode-solo-btn').className='btn btn-ghost btn-sm';
+  document.getElementById('mode-team-btn').className='btn btn-gold btn-sm';
+  if(!teamRows[1].length){ teamRows[1]=[{rowId:uid(),playerId:'',champId:'',glory:0},{rowId:uid(),playerId:'',champId:'',glory:0}]; }
+  if(!teamRows[2].length){ teamRows[2]=[{rowId:uid(),playerId:'',champId:'',glory:0},{rowId:uid(),playerId:'',champId:'',glory:0}]; }
+  renderTeamRows(1); renderTeamRows(2);
+});
+
+function champOptsByFaction(faction, selId=''){
+  const filtered = faction ? data.champions.filter(c=>c.faction===faction) : data.champions;
+  if(!filtered.length) return '<option value="">-- Aucun personnage pour cette faction --</option>';
+  return filtered.map(c=>`<option value="${c.id}" ${c.id===selId?'selected':''}>${esc(c.name)}</option>`).join('');
+}
+
+function renderTeamRows(teamNum){
+  const rows = teamRows[teamNum];
+  const faction = document.getElementById('team'+teamNum+'-faction').value;
+  const container = document.getElementById('team'+teamNum+'-rows');
+  container.innerHTML = rows.map(row=>`
+    <div class="p-row" data-rid="${row.rowId}" style="padding:8px 0;">
+      <div><label>Joueur</label><select class="tp" data-team="${teamNum}" data-rid="${row.rowId}"><option value="">-- Choisir --</option>${popts(row.playerId)}</select></div>
+      <div><label>Personnage</label><select class="tc" data-team="${teamNum}" data-rid="${row.rowId}"><option value="">-- Choisir --</option>${champOptsByFaction(faction,row.champId)}</select></div>
+      <div class="glory-col"><label>Gloire</label><input type="number" class="tg" data-team="${teamNum}" data-rid="${row.rowId}" min="0" max="20" value="${row.glory}"></div>
+    </div>`).join('');
+  container.querySelectorAll('.tp').forEach(s=>s.addEventListener('change',e=>{
+    teamRows[e.target.dataset.team].find(r=>r.rowId===e.target.dataset.rid).playerId=e.target.value;
+  }));
+  container.querySelectorAll('.tc').forEach(s=>s.addEventListener('change',e=>{
+    teamRows[e.target.dataset.team].find(r=>r.rowId===e.target.dataset.rid).champId=e.target.value;
+  }));
+  container.querySelectorAll('.tg').forEach(i=>i.addEventListener('change',e=>{
+    teamRows[e.target.dataset.team].find(r=>r.rowId===e.target.dataset.rid).glory=parseInt(e.target.value)||0;
+  }));
+}
+
+document.getElementById('team1-faction').addEventListener('change',()=>renderTeamRows(1));
+document.getElementById('team2-faction').addEventListener('change',()=>renderTeamRows(2));
+
 document.getElementById('add-row-btn').addEventListener('click',()=>{
   if(!reqEdit())return;if(pRows.length>=4)return;
   pRows.push({rowId:uid(),playerId:'',champId:'',glory:0,winner:false});renderPRows();
@@ -489,11 +601,29 @@ document.getElementById('add-row-btn').addEventListener('click',()=>{
 document.getElementById('cancel-edit-btn').addEventListener('click',resetForm);
 document.getElementById('submit-match-btn').addEventListener('click',()=>{
   if(!reqEdit())return;
-  if(pRows.length<2){toast('Il faut au moins 2 joueurs');return;}
-  for(const r of pRows){if(!r.playerId){toast('Sélectionne un joueur pour chaque ligne');return;}if(!r.champId){toast('Sélectionne un personnage pour chaque ligne');return;}}
-  if(new Set(pRows.map(r=>r.playerId)).size!==pRows.length){toast('Un joueur ne peut pas apparaître deux fois');return;}
-  if(new Set(pRows.map(r=>r.champId)).size!==pRows.length){toast('Un personnage ne peut pas apparaître deux fois');return;}
-  const m={id:editingMatchId||uid(),seasonId:document.getElementById('m-saison').value,date:document.getElementById('m-date').value,label:document.getElementById('m-label').value.trim(),participants:pRows.map(r=>({playerId:r.playerId,champId:r.champId,glory:r.glory,winner:!!r.winner}))};
+  let participants=[];
+  if(matchMode==='team'){
+    const t1win=document.getElementById('team1-winner').checked;
+    const t2win=document.getElementById('team2-winner').checked;
+    for(const teamNum of [1,2]){
+      const rows=teamRows[teamNum];
+      const isWinner=(teamNum===1?t1win:t2win);
+      for(const r of rows){
+        if(!r.playerId){toast('Sélectionne un joueur pour chaque membre');return;}
+        if(!r.champId){toast('Sélectionne un personnage pour chaque membre');return;}
+      }
+      rows.forEach(r=>participants.push({playerId:r.playerId,champId:r.champId,glory:r.glory,winner:isWinner,team:teamNum}));
+    }
+    const allIds=participants.map(p=>p.playerId);
+    if(new Set(allIds).size!==allIds.length){toast('Un joueur ne peut pas apparaître deux fois');return;}
+  } else {
+    if(pRows.length<2){toast('Il faut au moins 2 joueurs');return;}
+    for(const r of pRows){if(!r.playerId){toast('Sélectionne un joueur pour chaque ligne');return;}if(!r.champId){toast('Sélectionne un personnage pour chaque ligne');return;}}
+    if(new Set(pRows.map(r=>r.playerId)).size!==pRows.length){toast('Un joueur ne peut pas apparaître deux fois');return;}
+    if(new Set(pRows.map(r=>r.champId)).size!==pRows.length){toast('Un personnage ne peut pas apparaître deux fois');return;}
+    participants=pRows.map(r=>({playerId:r.playerId,champId:r.champId,glory:r.glory,winner:!!r.winner,team:null}));
+  }
+  const m={id:editingMatchId||uid(),mode:matchMode,seasonId:document.getElementById('m-saison').value,date:document.getElementById('m-date').value,label:document.getElementById('m-label').value.trim(),participants};
   if(editingMatchId){const idx=data.matches.findIndex(x=>x.id===editingMatchId);if(idx>=0)data.matches[idx]=m;}
   else data.matches.push(m);
   save();renderAll();toast(editingMatchId?'Match modifié':'Match enregistré');resetForm();
@@ -523,7 +653,7 @@ function delMatch(id){
 }
 
 // ── Classement ────────────────────────────────────────────
-function pts(p){return p.winner?10:p.glory;}
+function pts(p){return p.winner?(10+p.glory):p.glory;}
 
 function renderClassement(){
   const sf=document.getElementById('cl-saison').value;
@@ -581,7 +711,7 @@ function renderHistorique(){
         <button class="btn btn-danger btn-sm edit-only" onclick="delMatch('${m.id}')">Supprimer</button>
       </div>
     </div>
-    <div class="match-participants">${m.participants.map(p=>`<div class="p-line">${p.winner?'<span class="crown">👑</span>':''}<span class="pname">${esc(pn(p.playerId))}</span><span class="chip chip-${cf(p.champId)||''}">${esc(cn(p.champId))}</span><span class="glory">${p.glory} gloire</span><span class="ptsbadge">+${pts(p)} pts</span></div>`).join('')}</div>
+    <div class="match-participants">${m.participants.map(p=>`<div class="p-line">${p.winner?'<span class="crown">👑</span>':''}<span class="pname">${esc(pn(p.playerId))}</span><span class="chip chip-${cf(p.champId)||''}">${esc(cn(p.champId))}</span><span class="glory">${p.glory} gloire</span><span class="ptsbadge">+${pts(p)} pts</span>${p.team?'<span style="font-size:10px;color:var(--text-dim);margin-left:4px;">Eq.'+p.team+'</span>':''}</div>`).join('')}</div>
   </div>`).join('');
 }
 document.getElementById('hist-saison').addEventListener('change',renderHistorique);
