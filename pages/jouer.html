@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARMATTA — Jouer en ligne</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #080808;
+    --surface: #111;
+    --gold: #c8903a;
+    --gold-bright: #e8a33d;
+    --gold-dim: rgba(200,144,58,.12);
+    --text: #f0ece4;
+    --text-dim: #666;
+    --border: rgba(255,255,255,.06);
+    --border-bright: rgba(255,255,255,.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.08) 2px, rgba(0,0,0,.08) 4px);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── Header ── */
+  header {
+    position: relative; z-index: 1;
+    border-bottom: 1px solid var(--border);
+    padding: 20px 40px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
+  .back-link {
+    display: flex; align-items: center; gap: 8px;
+    text-decoration: none; color: var(--text-dim); font-size: 13px;
+    transition: color .15s;
+  }
+  .back-link:hover { color: var(--gold-bright); }
+  .back-link svg { width: 16px; height: 16px; }
+
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand img { height: 32px; filter: invert(1); }
+  .page-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: .2em; text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  /* ── Main ── */
+  main {
+    position: relative; z-index: 1;
+    min-height: calc(100vh - 90px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 24px;
+  }
+
+  .logo-title {
+    width: min(360px, 70vw);
+    margin-bottom: 40px;
+    filter: invert(1) brightness(1.2);
+  }
+
+  .spinner {
+    width: 40px; height: 40px;
+    border: 2px solid var(--border-bright);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    margin: 0 auto 28px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .status-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--gold-bright);
+    margin-bottom: 10px;
+  }
+
+  .status-sub {
+    font-size: 13px; color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+
+  .timer {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px; font-weight: 600;
+    letter-spacing: .1em;
+    color: var(--text-dim);
+  }
+  .timer strong { color: var(--text); font-weight: 700; }
+
+  /* ── Bloc "ça prend du temps" ── */
+  .slow-box {
+    margin-top: 36px;
+    border: 1px dashed var(--border-bright);
+    padding: 24px 28px;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .slow-box[hidden] { display: none; }
+  .slow-text {
+    font-size: 13px; color: var(--text-dim); line-height: 1.6;
+  }
+
+  .actions {
+    display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+    padding: 12px 22px;
+    border: 1px solid var(--gold);
+    background: var(--gold-dim);
+    color: var(--gold-bright);
+    cursor: pointer;
+    clip-path: polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+    transition: all .2s;
+  }
+  .btn:hover { background: rgba(200,144,58,.25); }
+  .btn.secondary {
+    border-color: var(--border-bright);
+    background: transparent;
+    color: var(--text);
+  }
+  .btn.secondary:hover { background: rgba(255,255,255,.05); }
+
+  footer {
+    position: relative; z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 24px 40px;
+    text-align: center;
+    font-size: 11px; color: #333; letter-spacing: .05em;
+  }
+
+  @media(max-width:560px){
+    header { padding: 16px 20px; }
+    main { padding: 40px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../index.html" class="back-link">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Retour
+  </a>
+  <a href="../index.html" class="brand" style="text-decoration:none;">
+    <img src="../assets/images/TITRE%20Armatta.png" alt="Armatta">
+  </a>
+  <span class="page-title">Jouer en ligne</span>
+  <div></div>
+</header>
+
+<main>
+  <img src="../assets/images/TITRE%20Armatta.png" alt="ARMATTA" class="logo-title">
+
+  <div class="spinner" id="spinner"></div>
+  <p class="status-text" id="status">Réveil du serveur de jeu en cours…</p>
+  <p class="status-sub">Le serveur gratuit se met en veille après quelques minutes d'inactivité.</p>
+  <p class="timer"><strong id="seconds">0</strong>s écoulées</p>
+
+  <div class="slow-box" id="slow-box" hidden>
+    <p class="slow-text">Ça prend plus longtemps que prévu. Tu peux réessayer, ou rejoindre la partie directement.</p>
+    <div class="actions">
+      <button class="btn" id="retry-btn" type="button">Réessayer</button>
+      <a class="btn secondary" href="https://jouer.armatta.fr">Rejoindre directement</a>
+    </div>
+  </div>
+</main>
+
+<footer>© 2025 Ludik Wargame — Armatta, Brutal et Imprévisible</footer>
+
+<script>
+  (function () {
+    var TARGET_URL = 'https://jouer.armatta.fr';
+    var HEALTH_URL = 'https://jouer.armatta.fr/health';
+    var PING_INTERVAL_MS = 2500;
+    var TIMEOUT_S = 90;
+
+    var secondsEl = document.getElementById('seconds');
+    var statusEl = document.getElementById('status');
+    var spinnerEl = document.getElementById('spinner');
+    var slowBox = document.getElementById('slow-box');
+    var retryBtn = document.getElementById('retry-btn');
+
+    var seconds = 0;
+    var pingTimer = null;
+    var secondsTimer = null;
+    var pingInFlight = false;
+    var redirected = false;
+
+    function stopTimers() {
+      if (pingTimer) clearInterval(pingTimer);
+      if (secondsTimer) clearInterval(secondsTimer);
+      pingTimer = null;
+      secondsTimer = null;
+    }
+
+    function tickSeconds() {
+      seconds += 1;
+      secondsEl.textContent = String(seconds);
+      if (seconds >= TIMEOUT_S) {
+        showSlow();
+      }
+    }
+
+    function showSlow() {
+      stopTimers();
+      spinnerEl.hidden = true;
+      statusEl.textContent = 'Ça prend plus longtemps que prévu…';
+      slowBox.hidden = false;
+    }
+
+    function ping() {
+      if (redirected || pingInFlight) return;
+      pingInFlight = true;
+      fetch(HEALTH_URL, { mode: 'cors', cache: 'no-store' })
+        .then(function (res) {
+          if (res && res.ok) {
+            redirected = true;
+            stopTimers();
+            window.location.href = TARGET_URL;
+          }
+        })
+        .catch(function () {
+          // Serveur pas encore réveillé, on réessaiera au prochain tick.
+        })
+        .finally(function () {
+          pingInFlight = false;
+        });
+    }
+
+    function start() {
+      redirected = false;
+      seconds = 0;
+      secondsEl.textContent = '0';
+      spinnerEl.hidden = false;
+      statusEl.textContent = 'Réveil du serveur de jeu en cours…';
+      slowBox.hidden = true;
+
+      ping();
+      pingTimer = setInterval(ping, PING_INTERVAL_MS);
+      secondsTimer = setInterval(tickSeconds, 1000);
+    }
+
+    retryBtn.addEventListener('click', start);
+
+    start();
+  })();
+</script>
+
+</body>
+</html>
