@@ -20,93 +20,176 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+  }
 
   body::before {
     content: '';
-    position: fixed; inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.08) 2px, rgba(0,0,0,.08) 4px);
-    pointer-events: none; z-index: 0;
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(200,144,58,.08) 39px, rgba(200,144,58,.08) 40px),
+                repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(200,144,58,.08) 39px, rgba(200,144,58,.08) 40px);
+    pointer-events: none;
+    z-index: 0;
   }
 
   /* ── Header ── */
   header {
-    position: relative; z-index: 1;
+    position: relative;
+    z-index: 1;
     border-bottom: 1px solid var(--border);
-    padding: 20px 40px;
-    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
   }
+
   .back-link {
-    display: flex; align-items: center; gap: 8px;
-    text-decoration: none; color: var(--text-dim); font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--text-dim);
+    font-size: 14px;
     transition: color .15s;
   }
   .back-link:hover { color: var(--gold-bright); }
-  .back-link svg { width: 16px; height: 16px; }
+  .back-link svg { width: 18px; height: 18px; }
 
-  .brand { display: flex; align-items: center; gap: 14px; }
-  .brand img { height: 32px; filter: invert(1); }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand img { height: 28px; filter: invert(1); }
+
   .page-title {
     font-family: 'Rajdhani', sans-serif;
-    font-size: 13px; font-weight: 700;
-    letter-spacing: .2em; text-transform: uppercase;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
     color: var(--gold);
   }
 
   /* ── Main ── */
   main {
-    position: relative; z-index: 1;
-    min-height: calc(100vh - 90px);
+    position: relative;
+    z-index: 1;
+    min-height: calc(100vh - 140px);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 60px 24px;
+    padding: 40px 24px;
   }
 
   .logo-title {
-    width: min(360px, 70vw);
+    width: min(90vw, 360px);
     margin-bottom: 40px;
     filter: invert(1) brightness(1.2);
+    animation: breathe 2.6s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%, 100% { opacity: .88; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.015); }
   }
 
-  .spinner {
-    width: 40px; height: 40px;
-    border: 2px solid var(--border-bright);
-    border-top-color: var(--gold);
+  /* ── Emblème tournant ── */
+  .rig {
+    position: relative;
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 32px;
+  }
+  .rig .ring {
+    position: absolute;
+    inset: 0;
     border-radius: 50%;
-    margin: 0 auto 28px;
-    animation: spin 1s linear infinite;
+    border: 2px solid var(--border-bright);
+  }
+  .rig .ring-outer {
+    border-top-color: var(--gold);
+    border-right-color: var(--gold);
+    animation: spin 1.4s linear infinite;
+  }
+  .rig .ring-inner {
+    inset: 16px;
+    border-bottom-color: var(--gold-bright);
+    border-left-color: var(--gold-bright);
+    animation: spin-rev 1.9s linear infinite;
+  }
+  .rig .core {
+    position: absolute;
+    inset: 38px;
+    border-radius: 2px;
+    background: var(--gold);
+    transform: rotate(45deg);
+    animation: pulse-core 1.4s ease-in-out infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes spin-rev { to { transform: rotate(-360deg); } }
+  @keyframes pulse-core {
+    0%, 100% { opacity: .55; }
+    50% { opacity: 1; }
+  }
 
   .status-text {
     font-family: 'Rajdhani', sans-serif;
-    font-size: 18px; font-weight: 700;
-    letter-spacing: .06em; text-transform: uppercase;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
     color: var(--gold-bright);
     margin-bottom: 10px;
+    min-height: 30px;
+    transition: opacity .25s ease;
   }
+  .status-text.fade { opacity: 0; }
 
   .status-sub {
-    font-size: 13px; color: var(--text-dim);
-    margin-bottom: 6px;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 28px;
   }
+
+  /* ── Barre de progression ── */
+  .progress-shell {
+    width: min(90vw, 340px);
+    height: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border-bright);
+    margin-bottom: 14px;
+    overflow: hidden;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--gold) 0%, var(--gold-bright) 100%);
+    transition: width .6s ease;
+  }
+  .progress-fill.done { background: linear-gradient(90deg, #4caf6a, #7fd99a); }
 
   .timer {
     font-family: 'Rajdhani', sans-serif;
-    font-size: 13px; font-weight: 600;
-    letter-spacing: .1em;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .04em;
     color: var(--text-dim);
+    margin-bottom: 8px;
   }
   .timer strong { color: var(--text); font-weight: 700; }
 
   /* ── Bloc "ça prend du temps" ── */
   .slow-box {
-    margin-top: 36px;
+    margin-top: 28px;
     border: 1px dashed var(--border-bright);
-    padding: 24px 28px;
+    padding: 20px 24px;
     max-width: 420px;
     display: flex;
     flex-direction: column;
@@ -114,27 +197,37 @@
     gap: 16px;
   }
   .slow-box[hidden] { display: none; }
+
   .slow-text {
-    font-size: 13px; color: var(--text-dim); line-height: 1.6;
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.6;
   }
 
   .actions {
-    display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
   .btn {
-    display: inline-flex; align-items: center; gap: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     text-decoration: none;
     font-family: 'Inter', sans-serif;
-    font-size: 13px; font-weight: 700;
-    letter-spacing: .06em; text-transform: uppercase;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
     padding: 12px 22px;
     border: 1px solid var(--gold);
     background: var(--gold-dim);
     color: var(--gold-bright);
     cursor: pointer;
-    clip-path: polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
-    transition: all .2s;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+    transition: all .15s;
   }
   .btn:hover { background: rgba(200,144,58,.25); }
   .btn.secondary {
@@ -145,16 +238,19 @@
   .btn.secondary:hover { background: rgba(255,255,255,.05); }
 
   footer {
-    position: relative; z-index: 1;
+    position: relative;
+    z-index: 1;
     border-top: 1px solid var(--border);
-    padding: 24px 40px;
+    padding: 20px;
     text-align: center;
-    font-size: 11px; color: #333; letter-spacing: .05em;
+    font-size: 11px;
+    color: #333;
+    letter-spacing: .05em;
   }
 
-  @media(max-width:560px){
+  @media (max-width: 560px) {
     header { padding: 16px 20px; }
-    main { padding: 40px 20px; }
+    main { padding: 32px 16px; }
   }
 </style>
 </head>
@@ -169,19 +265,25 @@
     <img src="../assets/images/TITRE%20Armatta.png" alt="Armatta">
   </a>
   <span class="page-title">Jouer en ligne</span>
-  <div></div>
 </header>
 
 <main>
   <img src="../assets/images/TITRE%20Armatta.png" alt="ARMATTA" class="logo-title">
 
-  <div class="spinner" id="spinner"></div>
-  <p class="status-text" id="status">Réveil du serveur de jeu en cours…</p>
-  <p class="status-sub">Le serveur gratuit se met en veille après quelques minutes d'inactivité.</p>
-  <p class="timer"><strong id="seconds">0</strong>s écoulées</p>
+  <div class="rig" id="rig">
+    <div class="ring ring-outer"></div>
+    <div class="ring ring-inner"></div>
+    <div class="core"></div>
+  </div>
+
+  <div class="status-text" id="status">Réveil du serveur de jeu…</div>
+  <div class="status-sub">Le serveur gratuit se met en veille après quelques minutes d'inactivité.</div>
+
+  <div class="progress-shell"><div class="progress-fill" id="progress-fill"></div></div>
+  <div class="timer"><strong id="seconds">0</strong>s écoulées</div>
 
   <div class="slow-box" id="slow-box" hidden>
-    <p class="slow-text">Ça prend plus longtemps que prévu. Tu peux réessayer, ou rejoindre la partie directement.</p>
+    <div class="slow-text">Ça prend plus longtemps que prévu. Tu peux réessayer, ou rejoindre la partie directement.</div>
     <div class="actions">
       <button class="btn" id="retry-btn" type="button">Réessayer</button>
       <a class="btn secondary" href="https://jouer.armatta.fr">Rejoindre directement</a>
@@ -192,82 +294,135 @@
 <footer>© 2025 Ludik Wargame — Armatta, Brutal et Imprévisible</footer>
 
 <script>
-  (function () {
-    var TARGET_URL = 'https://jouer.armatta.fr';
-    var HEALTH_URL = 'https://jouer.armatta.fr/health';
-    var PING_INTERVAL_MS = 2500;
-    var TIMEOUT_S = 90;
+(function () {
+  var TARGET_URL = 'https://jouer.armatta.fr';
+  var HEALTH_URL = 'https://jouer.armatta.fr/health';
+  var PING_INTERVAL_MS = 2500;
+  var TIMEOUT_S = 90;
+  var MESSAGE_INTERVAL_MS = 2200;
+  var EXPECTED_WAKE_S = 55; // durée typique d'un réveil, sert juste à faire avancer la barre
 
-    var secondsEl = document.getElementById('seconds');
-    var statusEl = document.getElementById('status');
-    var spinnerEl = document.getElementById('spinner');
-    var slowBox = document.getElementById('slow-box');
-    var retryBtn = document.getElementById('retry-btn');
+  var MESSAGES = [
+    "Réveil du serveur de jeu…",
+    "Préparation de l'arène…",
+    "Mise en place des bots…",
+    "Nettoyage des dalles de combat…",
+    "Chargement des decks Arsenal…",
+    "Affûtage des lames…",
+    "Calibrage des armes à distance…",
+    "Réglage des dés tactiques…",
+    "Recrutement des champions…",
+    "Distribution des jetons de gloire…",
+    "Vérification des cubes d'action…",
+    "Repositionnement des tuiles EXIT…",
+    "Synchronisation avec le QG…",
+    "Réanimation du Boss…",
+    "Ouverture de la salle d'armement…",
+    "Dépoussiérage des cartes légendaires…"
+  ];
 
-    var seconds = 0;
-    var pingTimer = null;
-    var secondsTimer = null;
-    var pingInFlight = false;
-    var redirected = false;
+  var secondsEl = document.getElementById('seconds');
+  var statusEl = document.getElementById('status');
+  var rigEl = document.getElementById('rig');
+  var slowBox = document.getElementById('slow-box');
+  var retryBtn = document.getElementById('retry-btn');
+  var progressFill = document.getElementById('progress-fill');
 
-    function stopTimers() {
-      if (pingTimer) clearInterval(pingTimer);
-      if (secondsTimer) clearInterval(secondsTimer);
-      pingTimer = null;
-      secondsTimer = null;
+  var seconds = 0;
+  var pingTimer = null;
+  var secondsTimer = null;
+  var messageTimer = null;
+  var pingInFlight = false;
+  var redirected = false;
+  var msgIndex = 0;
+  var msgOrder = [];
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
     }
+    return a;
+  }
 
-    function tickSeconds() {
-      seconds += 1;
-      secondsEl.textContent = String(seconds);
-      if (seconds >= TIMEOUT_S) {
-        showSlow();
-      }
+  function nextMessage() {
+    if (msgIndex >= msgOrder.length) {
+      msgOrder = shuffle(MESSAGES);
+      msgIndex = 0;
     }
+    var msg = msgOrder[msgIndex++];
+    statusEl.classList.add('fade');
+    setTimeout(function () {
+      statusEl.textContent = msg;
+      statusEl.classList.remove('fade');
+    }, 220);
+  }
 
-    function showSlow() {
-      stopTimers();
-      spinnerEl.hidden = true;
-      statusEl.textContent = 'Ça prend plus longtemps que prévu…';
-      slowBox.hidden = false;
-    }
+  function stopTimers() {
+    if (pingTimer) clearInterval(pingTimer);
+    if (secondsTimer) clearInterval(secondsTimer);
+    if (messageTimer) clearInterval(messageTimer);
+    pingTimer = null; secondsTimer = null; messageTimer = null;
+  }
 
-    function ping() {
-      if (redirected || pingInFlight) return;
-      pingInFlight = true;
-      fetch(HEALTH_URL, { mode: 'cors', cache: 'no-store' })
-        .then(function (res) {
-          if (res && res.ok) {
-            redirected = true;
-            stopTimers();
-            window.location.href = TARGET_URL;
-          }
-        })
-        .catch(function () {
-          // Serveur pas encore réveillé, on réessaiera au prochain tick.
-        })
-        .finally(function () {
-          pingInFlight = false;
-        });
-    }
+  function tickSeconds() {
+    seconds++;
+    secondsEl.textContent = String(seconds);
+    var pct = Math.min(92, Math.round((seconds / EXPECTED_WAKE_S) * 92));
+    progressFill.style.width = pct + '%';
+    if (seconds >= TIMEOUT_S) showSlow();
+  }
 
-    function start() {
-      redirected = false;
-      seconds = 0;
-      secondsEl.textContent = '0';
-      spinnerEl.hidden = false;
-      statusEl.textContent = 'Réveil du serveur de jeu en cours…';
-      slowBox.hidden = true;
+  function showSlow() {
+    stopTimers();
+    rigEl.hidden = true;
+    statusEl.textContent = 'Ça prend plus longtemps que prévu…';
+    slowBox.hidden = false;
+  }
 
-      ping();
-      pingTimer = setInterval(ping, PING_INTERVAL_MS);
-      secondsTimer = setInterval(tickSeconds, 1000);
-    }
+  function ping() {
+    if (redirected || pingInFlight) return;
+    pingInFlight = true;
+    fetch(HEALTH_URL, { mode: 'cors', cache: 'no-store' })
+      .then(function (res) {
+        if (res.ok) {
+          redirected = true;
+          progressFill.style.width = '100%';
+          progressFill.classList.add('done');
+          statusEl.classList.add('fade');
+          setTimeout(function () { statusEl.textContent = 'Prêt !'; statusEl.classList.remove('fade'); }, 220);
+          stopTimers();
+          setTimeout(function () { window.location.href = TARGET_URL; }, 400);
+        }
+      })
+      .catch(function () {
+        // Serveur pas encore réveillé, on réessaiera au prochain tick.
+      })
+      .finally(function () { pingInFlight = false; });
+  }
 
-    retryBtn.addEventListener('click', start);
+  function start() {
+    redirected = false;
+    seconds = 0;
+    secondsEl.textContent = '0';
+    rigEl.hidden = false;
+    progressFill.classList.remove('done');
+    progressFill.style.width = '0%';
+    msgOrder = shuffle(MESSAGES);
+    msgIndex = 0;
+    statusEl.textContent = MESSAGES[0];
+    slowBox.hidden = true;
 
-    start();
-  })();
+    ping();
+    pingTimer = setInterval(ping, PING_INTERVAL_MS);
+    secondsTimer = setInterval(tickSeconds, 1000);
+    messageTimer = setInterval(nextMessage, MESSAGE_INTERVAL_MS);
+  }
+
+  retryBtn.addEventListener('click', start);
+  start();
+})();
 </script>
 
 </body>
